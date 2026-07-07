@@ -6,6 +6,7 @@ export interface ColumnMapping {
 export interface ColumnMappingResult extends ColumnMapping {
   confidence: number;
   source: 'Heuristic' | 'Gemini';
+  reason?: string;
 }
 
 export interface MappingConfig {
