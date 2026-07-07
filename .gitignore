@@ -1,0 +1,19 @@
+# Dependency directories
+node_modules/
+
+# Build outputs
+dist/
+
+# Local environment configuration
+.env
+
+# Log files
+*.log
+pino-*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Temporary test directories
+test/
