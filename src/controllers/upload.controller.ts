@@ -10,8 +10,7 @@ const logger = pino();
 export class UploadController {
   constructor(
     private csvParser: ICsvParserService,
-    private preprocessingService: IPreprocessingService,
-    private _aiMappingService: any // Unused for now but kept for constructor DI layout compatibility
+    private preprocessingService: IPreprocessingService
   ) {}
 
   upload = async (

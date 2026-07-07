@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { uploadMiddleware } from '../middlewares/upload.middleware';
 import { UploadController } from '../controllers/upload.controller';
+import { MappingController } from '../controllers/mapping.controller';
 import { ImportController } from '../controllers/import.controller';
 
 // Services Instantiations (Dependency Injection Bootstrapping)
@@ -17,24 +18,21 @@ import { SummaryBuilderService } from '../services/import/summary-builder.servic
 
 const router = Router();
 
-const csvParser = new CsvParserService();
-const preprocessingService = new PreprocessingService();
-const aiMappingService = new AiMappingService();
-const schemaValidation = new SchemaValidationService();
-
 const promptBuilder = new PromptBuilderService();
 const geminiExtraction = new GeminiExtractionService();
+
+const csvParser = new CsvParserService();
+const preprocessingService = new PreprocessingService();
+const aiMappingService = new AiMappingService(promptBuilder, geminiExtraction);
+const schemaValidation = new SchemaValidationService();
 const retryService = new RetryService();
 
 const batchProcessor = new BatchProcessorService(promptBuilder, geminiExtraction, retryService);
 const crmTransformation = new CrmTransformationService();
 const summaryBuilder = new SummaryBuilderService();
 
-const uploadController = new UploadController(
-  csvParser,
-  preprocessingService,
-  aiMappingService
-);
+const uploadController = new UploadController(csvParser, preprocessingService);
+const mappingController = new MappingController(aiMappingService);
 
 const importController = new ImportController(
   schemaValidation,
@@ -45,6 +43,7 @@ const importController = new ImportController(
 
 // Endpoints setup
 router.post('/upload', uploadMiddleware, uploadController.upload);
+router.post('/mapping', mappingController.mapping);
 router.post('/import', importController.import);
 router.get('/status/:jobId', importController.status);
 
