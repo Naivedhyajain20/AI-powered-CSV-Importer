@@ -12,3 +12,6 @@ app.listen(PORT, () => {
     'Server successfully started and listening for requests'
   );
 });
+
+// Hot reload trigger for new GEMINI_API_KEY env change 8
+
