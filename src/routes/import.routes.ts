@@ -38,7 +38,8 @@ const importController = new ImportController(
   schemaValidation,
   batchProcessor,
   crmTransformation,
-  summaryBuilder
+  summaryBuilder,
+  retryService
 );
 
 // Endpoints setup

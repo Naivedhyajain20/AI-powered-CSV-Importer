@@ -1,16 +1,20 @@
 import { Request, Response, NextFunction } from 'express';
+import pino from 'pino';
 import { ISchemaValidationService } from '../services/mapping/schema-validation.service';
 import { IBatchProcessorService } from '../services/import/batch-processor.service';
 import { ICrmTransformationService } from '../services/import/crm-transformation.service';
 import { ISummaryBuilderService } from '../services/import/summary-builder.service';
-import { ApiResponse } from '../types/api';
+import { IRetryService } from '../services/ai/retry.service';
+
+const logger = pino();
 
 export class ImportController {
   constructor(
     private schemaValidation: ISchemaValidationService,
     private batchProcessor: IBatchProcessorService,
-    private crmTransformation: ICrmTransformationService,
-    private summaryBuilder: ISummaryBuilderService
+    private _crmTransformation: ICrmTransformationService, // transformation runs inside batch processor now to maximize success
+    private summaryBuilder: ISummaryBuilderService,
+    private retryService: IRetryService
   ) {}
 
   import = async (
@@ -19,10 +23,22 @@ export class ImportController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const { jobId, mappings } = req.body;
+      const { uploadId, jobId, mappings, records } = req.body;
+      const targetJobId = uploadId || jobId;
 
-      // 1. Validate incoming mappings structure & schema requirements
-      const schemaCheck = await this.schemaValidation.validate({ jobId, mappings });
+      if (!records || !Array.isArray(records) || records.length === 0) {
+        res.status(400).json({
+          success: false,
+          error: {
+            code: 'MISSING_RECORDS',
+            message: 'No CSV records provided for import processing',
+          },
+        });
+        return;
+      }
+
+      // 1. Validate incoming mappings structure
+      const schemaCheck = await this.schemaValidation.validate({ jobId: targetJobId, mappings });
       if (!schemaCheck.valid) {
         res.status(400).json({
           success: false,
@@ -35,23 +51,31 @@ export class ImportController {
         return;
       }
 
-      // 2. Mock records acquisition (normally fetched from storage/DB via jobId)
-      const mockRecords: Record<string, any>[] = [];
+      // 2. Track execution metrics
+      const startTime = Date.now();
+      this.retryService.resetRetryCount();
 
-      // 3. Batch processing (runs prompt builder, gemini extraction, retry, zod validation)
-      const batchResults = await this.batchProcessor.process(mockRecords, mappings);
+      // 3. Batch processing (converts CSV to JSON, executes Gemini call, normalizes, validates)
+      const batchResults = await this.batchProcessor.process(records, mappings);
 
-      // 4. CRM Ingestion/Transformation
-      const crmPayload = await this.crmTransformation.transform(
-        batchResults.flatMap((r) => r.succeeded)
+      const processingTimeMs = Date.now() - startTime;
+      const retryCount = this.retryService.getRetryCount();
+      const totalGeminiCalls = batchResults.length + retryCount;
+
+      // 4. Build rich execution summary
+      const summaryResult = await this.summaryBuilder.build(
+        batchResults,
+        processingTimeMs,
+        retryCount,
+        totalGeminiCalls
       );
 
-      // 5. Build summary
-      const response = this.summaryBuilder.build(batchResults);
-      response.records = crmPayload;
-      response.metadata = { jobId, durationMs: 0 };
+      logger.info({ jobId: targetJobId, durationMs: processingTimeMs }, 'Summary Generated');
 
-      res.status(200).json(response);
+      res.status(200).json({
+        success: true,
+        ...summaryResult,
+      });
     } catch (error) {
       next(error);
     }
@@ -65,7 +89,7 @@ export class ImportController {
     try {
       const { jobId } = req.params;
 
-      const response: ApiResponse = {
+      res.status(200).json({
         success: true,
         metadata: {
           jobId,
@@ -77,9 +101,7 @@ export class ImportController {
             failedBatches: 0,
           },
         },
-      };
-
-      res.status(200).json(response);
+      });
     } catch (error) {
       next(error);
     }

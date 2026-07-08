@@ -1,15 +1,35 @@
 import { Batch } from '../../types/batch';
 import { ColumnMapping } from '../../types/mapping';
 import { TARGET_CRM_FIELDS } from '../../config/header-synonyms';
+import { CRM_EXTRACTION_PROMPT_TEMPLATE } from '../../prompts/crm-extraction.prompt';
+import { FEW_SHOT_EXAMPLES } from '../../prompts/few-shot.examples';
 
 export interface IPromptBuilderService {
-  buildExtractionPrompt(_batch: Batch, _mappings: ColumnMapping[]): string;
+  buildExtractionPrompt(batch: Batch, mappings: ColumnMapping[]): string;
   buildMappingPrompt(headers: string[], sampleRows: Record<string, any>[]): string;
 }
 
 export class PromptBuilderService implements IPromptBuilderService {
-  buildExtractionPrompt(_batch: Batch, _mappings: ColumnMapping[]): string {
-    return '';
+  buildExtractionPrompt(batch: Batch, mappings: ColumnMapping[]): string {
+    // 1. Convert each batch row into structured JSON objects based on the approved mappings
+    const mappedRecords = batch.rows.map((row) => {
+      const mappedRecord: Record<string, any> = {};
+      for (const mapping of mappings) {
+        if (mapping.targetField) {
+          mappedRecord[mapping.targetField] = row[mapping.sourceHeader] ?? '';
+        }
+      }
+      return mappedRecord;
+    });
+
+    // 2. Format inputs into the prompt template
+    const recordsJson = JSON.stringify(mappedRecords, null, 2);
+    const fewShotsJson = JSON.stringify(FEW_SHOT_EXAMPLES, null, 2);
+
+    return CRM_EXTRACTION_PROMPT_TEMPLATE.replace('{{records}}', recordsJson).replace(
+      '{{fewShots}}',
+      fewShotsJson
+    );
   }
 
   buildMappingPrompt(headers: string[], sampleRows: Record<string, any>[]): string {
