@@ -14,7 +14,7 @@ export class CrmTransformationService implements ICrmTransformationService {
       const copy = { ...record };
 
       // 1. Multiple Emails: keep first, append rest to crm_note
-      let rawEmail = copy.email ? String(copy.email).trim() : '';
+      const rawEmail = copy.email ? String(copy.email).trim() : '';
       let emailParts: string[] = [];
       if (rawEmail) {
         emailParts = rawEmail.split(/[;,|\s]+/).map((e) => normalizeEmail(e)).filter(Boolean);
@@ -24,7 +24,7 @@ export class CrmTransformationService implements ICrmTransformationService {
       copy.email = primaryEmail;
 
       // 2. Multiple Phones: keep first, parse country/digits, append rest to crm_note
-      let rawPhone = copy.mobile_without_country_code ?? copy.phone ?? '';
+      const rawPhone = copy.mobile_without_country_code ?? copy.phone ?? '';
       let phoneParts: string[] = [];
       if (typeof rawPhone === 'string' || typeof rawPhone === 'number') {
         phoneParts = String(rawPhone).split(/[;,|\s]+/).map((p) => p.trim()).filter(Boolean);

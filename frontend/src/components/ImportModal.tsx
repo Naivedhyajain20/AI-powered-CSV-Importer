@@ -341,17 +341,17 @@ export default function ImportModal({ onClose, onImportComplete, onLeadsReady }:
                           </span>
                           <ChevronRight size={14} style={{ color: 'var(--text-muted)' }} />
                           <select
-                            value={m.targetField}
+                            value={m.targetField ?? ''}
                             onChange={(e) => {
                               const updated = [...headerMappings];
-                              updated[idx] = { ...updated[idx], targetField: e.target.value };
+                              updated[idx] = { ...updated[idx], targetField: e.target.value || null };
                               setHeaderMappings(updated);
                             }}
                             style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', fontSize: 12.5, color: 'var(--text-primary)', background: '#fff', width: '100%', cursor: 'pointer' }}
                           >
                             <option value="">— Skip —</option>
                             {TARGET_CRM_FIELDS.map((f) => (
-                              <option key={f.key} value={f.key}>{f.label}</option>
+                              <option key={f.field} value={f.field}>{f.label}</option>
                             ))}
                           </select>
                           <span className={`badge ${confClass}`} style={{ justifyContent: 'center', fontSize: 11, padding: '2px 8px' }}>

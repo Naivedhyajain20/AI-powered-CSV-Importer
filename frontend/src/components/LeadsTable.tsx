@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Search, RefreshCw, MoreHorizontal, ChevronDown } from 'lucide-react';
+import { Search, RefreshCw, ChevronDown } from 'lucide-react';
 
 /* ─── Types ──────────────────────────────────────────────── */
 type LeadRow = Record<string, unknown>;
@@ -21,8 +21,12 @@ function getBadgeClass(status: string): string {
 }
 
 function getStatusLabel(status: string): string {
-  if (!status) return 'Not Dialed';
-  return status;
+  const s = (status ?? '').trim().toUpperCase();
+  if (s === 'GOOD_LEAD_FOLLOW_UP') return 'Follow Up';
+  if (s === 'SALE_DONE') return 'Sale Done';
+  if (s === 'DID_NOT_CONNECT') return 'No Answer';
+  if (s === 'BAD_LEAD') return 'Disqualified';
+  return status || 'Not Dialed';
 }
 
 /* ─── Column helpers ─────────────────────────────────────── */
@@ -118,10 +122,24 @@ export default function LeadsTable({ records }: Props) {
             <tbody>
               {paginated.map((row, i) => {
                 const status = getField(row, 'status');
+                const name = getField(row, 'name');
+                const initials = name && name !== '—'
+                  ? name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+                  : 'LD';
                 return (
                   <tr key={i}>
                     <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                      {getField(row, 'name')}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{
+                          width: 28, height: 28, borderRadius: '50%', background: '#f1f5f9',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 11, fontWeight: 700, color: '#475569', border: '1px solid #e2e8f0',
+                          flexShrink: 0
+                        }}>
+                          {initials}
+                        </div>
+                        <span>{name}</span>
+                      </div>
                     </td>
                     <td style={{ color: 'var(--text-secondary)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {getField(row, 'email')}

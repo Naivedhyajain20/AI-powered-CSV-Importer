@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Papa from 'papaparse';
-import { uploadCSV, getMappings, runImport } from '../services/api';
+import { uploadCSV, getMappings, runImport, getImportStatus } from '../services/api';
 import { CSVRecord, ColumnMappingResult, DetailedImportResponse } from '../types/import';
 
 export type WizardStep = 'UPLOAD' | 'PREVIEW' | 'MAPPING' | 'IMPORTING' | 'SUMMARY';
@@ -110,8 +110,7 @@ export const useCsvWizard = () => {
 
     try {
       setLoadingStage('Uploading CSV...');
-      await updateStage('Preparing Prompt...', 600);
-      await updateStage('Calling Gemini...', 1000);
+      await updateStage('Preparing Prompt...', 400);
 
       // Parse full records client-side using Papaparse
       Papa.parse<CSVRecord>(file, {
@@ -119,9 +118,7 @@ export const useCsvWizard = () => {
         skipEmptyLines: 'greedy',
         complete: async (results) => {
           try {
-            await updateStage('Extracting CRM Records...', 800);
-            await updateStage('Validating CRM Schema...', 600);
-            await updateStage('Generating Final JSON...', 600);
+            await updateStage('Extracting CRM Records...', 400);
 
             // Map the simplified key mappings
             const simplifiedMappings = headerMappings.map((m) => ({
@@ -129,11 +126,52 @@ export const useCsvWizard = () => {
               targetField: m.targetField,
             }));
 
-            await updateStage('Building Summary...', 800);
+            // Launch import on backend
+            const initResponse = (await runImport(uploadId, simplifiedMappings, results.data)) as {
+              metadata?: { jobId?: string };
+            };
+            const jobId = initResponse.metadata?.jobId;
 
-            const res = await runImport(uploadId, simplifiedMappings, results.data);
-            setImportSummary(res);
-            setStep('SUMMARY');
+            if (!jobId) {
+              throw new Error('No Job ID received from import service');
+            }
+
+            // Start status polling
+            let isDone = false;
+            let statusError: string | null = null;
+            let completedResult: DetailedImportResponse | null = null;
+
+            while (!isDone) {
+              await new Promise((resolve) => setTimeout(resolve, 1500));
+              const statusResponse = (await getImportStatus(jobId)) as {
+                metadata?: {
+                  status?: string;
+                  progress?: { percentage?: number };
+                };
+                error?: { message?: string };
+              };
+              
+              if (statusResponse.metadata?.status === 'COMPLETED') {
+                completedResult = statusResponse as unknown as DetailedImportResponse;
+                isDone = true;
+              } else if (statusResponse.metadata?.status === 'FAILED') {
+                statusError = statusResponse.error?.message || 'Background import failed';
+                isDone = true;
+              } else {
+                // Update progress percentage
+                const pct = statusResponse.metadata?.progress?.percentage ?? 0;
+                setLoadingStage(`Extracting CRM Records (${pct}%)...`);
+              }
+            }
+
+            if (statusError) {
+              throw new Error(statusError);
+            }
+
+            if (completedResult) {
+              setImportSummary(completedResult);
+              setStep('SUMMARY');
+            }
           } catch (err: unknown) {
             setError(maskError(err) || 'Import pipeline failed');
             setStep('MAPPING');

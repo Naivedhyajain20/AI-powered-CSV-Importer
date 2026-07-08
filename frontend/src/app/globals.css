@@ -2,34 +2,36 @@
 
 /* ─── Design Tokens ─────────────────────────────────────── */
 :root {
-  --bg-page:        #f1f5f9;
+  --bg-page:        #f8fafc;
   --bg-sidebar:     #ffffff;
   --bg-card:        #ffffff;
   --bg-hover:       #f0fdf4;
-  --accent:         #16a34a;
-  --accent-hover:   #15803d;
-  --accent-light:   #dcfce7;
-  --accent-text:    #16a34a;
-  --text-primary:   #111827;
-  --text-secondary: #6b7280;
-  --text-muted:     #9ca3af;
-  --border:         #e5e7eb;
-  --border-hover:   #d1d5db;
+  --accent:         #10b981;
+  --accent-hover:   #059669;
+  --accent-light:   #d1fae5;
+  --accent-text:    #047857;
+  --text-primary:   #0f172a;
+  --text-secondary: #475569;
+  --text-muted:     #94a3b8;
+  --border:         #e2e8f0;
+  --border-hover:   #cbd5e1;
   --sidebar-w:      240px;
 
   /* Badge colours */
-  --badge-good-bg:    #dcfce7;
-  --badge-good-text:  #15803d;
+  --badge-good-bg:    #d1fae5;
+  --badge-good-text:  #047857;
   --badge-done-bg:    #dbeafe;
   --badge-done-text:  #1d4ed8;
-  --badge-none-bg:    #f3f4f6;
-  --badge-none-text:  #374151;
+  --badge-none-bg:    #f1f5f9;
+  --badge-none-text:  #475569;
   --badge-skip-bg:    #fef3c7;
-  --badge-skip-text:  #92400e;
+  --badge-skip-text:  #b45309;
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+
 @theme inline {
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
   --font-mono: ui-monospace, 'Geist Mono', monospace;
   --color-accent: var(--accent);
 }
@@ -50,8 +52,8 @@ html, body {
 /* ─── Scrollbars ─────────────────────────────────────────── */
 ::-webkit-scrollbar          { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track    { background: transparent; }
-::-webkit-scrollbar-thumb    { background: #d1d5db; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+::-webkit-scrollbar-thumb    { background: #cbd5e1; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* ─── Sidebar ────────────────────────────────────────────── */
 .sidebar {
@@ -191,7 +193,7 @@ html, body {
 }
 .data-table td {
   padding: 13px 14px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #f1f5f9;
   color: var(--text-primary);
   vertical-align: middle;
 }
@@ -271,7 +273,7 @@ html, body {
   background: var(--accent);
   color: #fff;
 }
-.btn-primary:hover  { background: var(--accent-hover); box-shadow: 0 4px 14px rgba(22,163,74,0.35); }
+.btn-primary:hover  { background: var(--accent-hover); box-shadow: 0 4px 14px rgba(16,185,129,0.35); }
 .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .btn-secondary {
@@ -279,7 +281,7 @@ html, body {
   color: var(--text-primary);
   border: 1px solid var(--border);
 }
-.btn-secondary:hover { background: #f9fafb; }
+.btn-secondary:hover { background: #f8fafc; }
 
 .btn-ghost {
   background: transparent;
@@ -287,7 +289,7 @@ html, body {
   padding: 6px 12px;
   font-size: 13px;
 }
-.btn-ghost:hover { background: #f3f4f6; color: var(--text-primary); }
+.btn-ghost:hover { background: #f1f5f9; color: var(--text-primary); }
 
 .btn-icon {
   background: transparent;
@@ -296,7 +298,7 @@ html, body {
   padding: 7px;
   border-radius: 8px;
 }
-.btn-icon:hover { background: #f3f4f6; color: var(--text-primary); }
+.btn-icon:hover { background: #f1f5f9; color: var(--text-primary); }
 
 /* ─── Progress stages inside modal ──────────────────────── */
 .stage-item {
@@ -326,14 +328,14 @@ html, body {
   align-items: center;
   gap: 10px;
   padding: 8px 0;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #f1f5f9;
 }
 .mapping-row:last-child { border-bottom: none; }
 
 /* ─── Confidence badge ───────────────────────────────────── */
-.conf-high   { color: #16a34a; }
-.conf-medium { color: #d97706; }
-.conf-low    { color: #dc2626; }
+.conf-high   { color: #10b981; }
+.conf-medium { color: #f59e0b; }
+.conf-low    { color: #ef4444; }
 
 /* ─── Toast ──────────────────────────────────────────────── */
 .toast {
@@ -349,7 +351,7 @@ html, body {
   animation: slideIn 0.25s ease;
   pointer-events: auto;
 }
-.toast-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
+.toast-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; }
 .toast-error   { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
 .toast-info    { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
 
@@ -376,4 +378,70 @@ html, body {
   overflow-x: auto;
   max-height: 340px;
   overflow-y: auto;
+}
+
+/* ─── Premium SaaS Styles ────────────────────────────────── */
+.landing-hero-glow {
+  position: absolute;
+  top: -10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  z-index: 1;
+  pointer-events: none;
+  filter: blur(60px);
+}
+.landing-grid {
+  background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.glass-card-premium {
+  background: rgba(17, 24, 39, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-card-premium:hover {
+  transform: translateY(-6px);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 12px 40px 0 rgba(16, 185, 129, 0.12);
+}
+.button-glow {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.35);
+  transition: all 0.2s ease;
+}
+.button-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 36px rgba(16, 185, 129, 0.55);
+}
+.animated-gradient-text {
+  background: linear-gradient(to right, #34d399, #10b981, #059669);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 4s linear infinite;
+}
+@keyframes shine {
+  to { background-position: 200% center; }
+}
+.timeline-step {
+  position: relative;
+  transition: all 0.3s ease;
+}
+.timeline-step::after {
+  content: '';
+  position: absolute;
+  top: 24px;
+  left: 48px;
+  right: -24px;
+  height: 2px;
+  background: linear-gradient(to right, rgba(16, 185, 129, 0.3), rgba(255, 255, 255, 0.05));
+  z-index: -1;
+}
+@media (max-width: 768px) {
+  .timeline-step::after { display: none; }
 }

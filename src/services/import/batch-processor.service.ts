@@ -13,7 +13,8 @@ export interface IBatchProcessorService {
   process(
     records: Record<string, any>[],
     mappings: ColumnMapping[],
-    batchSize?: number
+    batchSize?: number,
+    onProgress?: (completed: number, total: number) => void
   ): Promise<BatchResult[]>;
 }
 
@@ -27,106 +28,119 @@ export class BatchProcessorService implements IBatchProcessorService {
   async process(
     records: Record<string, any>[],
     mappings: ColumnMapping[],
-    batchSize = 50
+    batchSize = 50,
+    onProgress?: (completed: number, total: number) => void
   ): Promise<BatchResult[]> {
-    const results: BatchResult[] = [];
+    const batches: { index: number; rows: Record<string, any>[]; startIndex: number }[] = [];
     let startIndex = 0;
     let batchIndex = 0;
 
-    const crmTransformer = new CrmTransformationService();
-
+    // 1. Split full records array into distinct batches
     while (startIndex < records.length) {
-      let currentSize = batchSize;
-      let currentRows = records.slice(startIndex, startIndex + currentSize);
-
-      let prompt = this.promptBuilder.buildExtractionPrompt(
-        { index: batchIndex, rows: currentRows },
-        mappings
-      );
-
-      // Prompt Token Size Protection (30,000 characters limit)
-      const MAX_CHAR_SIZE = 30000;
-      while (prompt.length > MAX_CHAR_SIZE && currentSize > 5) {
-        currentSize = Math.floor(currentSize / 2);
-        currentRows = records.slice(startIndex, startIndex + currentSize);
-        prompt = this.promptBuilder.buildExtractionPrompt(
-          { index: batchIndex, rows: currentRows },
-          mappings
-        );
-        logger.info(
-          { originalSize: batchSize, newSize: currentSize, promptLength: prompt.length },
-          'Dynamic batch splitting triggered'
-        );
-      }
-
-      logger.info({ batchIndex, rowsCount: currentRows.length }, 'Batch Started');
-
-      let succeeded: any[] = [];
-      const failed: any[] = [];
-
-      try {
-        // Call Gemini within Retry execution wrapper
-        const rawJsonResult = await this.retryService.execute(async () => {
-          logger.info({ batchIndex }, 'Gemini Request');
-          return await this.extractionService.extract(prompt);
-        });
-
-        // Strip markdown backticks if returned
-        let cleanedJson = rawJsonResult.trim();
-        if (cleanedJson.startsWith('```')) {
-          cleanedJson = cleanedJson.replace(/^```json\s*/, '').replace(/```$/, '');
-        }
-
-        const extracted = JSON.parse(cleanedJson);
-        if (!Array.isArray(extracted)) {
-          throw new Error('Gemini output is not a JSON array');
-        }
-
-        // Normalize BEFORE validation to maximize valid matches
-        const normalized = await crmTransformer.transform(extracted);
-        logger.info({ batchIndex }, 'Transformation Completed');
-
-        // Validate via Zod and check contact skip rules
-        const validation = validateExtractionResponse(normalized, startIndex);
-        succeeded = validation.validRecords;
-
-        validation.skippedRecords.forEach((s) => {
-          failed.push({
-            rowIndex: s.rowIndex,
-            message: s.reason,
-          });
-        });
-        logger.info({ batchIndex }, 'Validation Completed');
-
-      } catch (error: any) {
-        logger.error(
-          { err: error.message, batchIndex },
-          'Batch Completed with failure'
-        );
-
-        // Fail-tolerance: register failed rows and continue with subsequent batches
-        currentRows.forEach((_, idx) => {
-          failed.push({
-            rowIndex: startIndex + idx,
-            message: `Batch processing failed: ${error.message}`,
-          });
-        });
-      }
-
-      results.push({
+      const currentRows = records.slice(startIndex, startIndex + batchSize);
+      batches.push({
         index: batchIndex,
-        succeeded,
-        failed,
+        rows: currentRows,
+        startIndex,
       });
-
-      logger.info(
-        { batchIndex, succeededCount: succeeded.length, failedCount: failed.length },
-        'Batch Completed'
-      );
-
       startIndex += currentRows.length;
       batchIndex++;
     }
+
+    const crmTransformer = new CrmTransformationService();
+    const results: BatchResult[] = [];
+    
+    // Concurrency Limit: Process at most 2 batches in parallel at any one time.
+    // This staggers requests and prevents exceeding Groq free tier TPM rate limit spikes.
+    const concurrency = 2;
+    let completedCount = 0;
+    const totalBatches = batches.length;
+
+    for (let i = 0; i < batches.length; i += concurrency) {
+      const chunk = batches.slice(i, i + concurrency);
+      
+      const chunkPromises = chunk.map(async (batch) => {
+        let succeeded: any[] = [];
+        const failed: any[] = [];
+
+        try {
+          const prompt = this.promptBuilder.buildExtractionPrompt(
+            { index: batch.index, rows: batch.rows },
+            mappings
+          );
+
+          logger.info({ batchIndex: batch.index, rowsCount: batch.rows.length }, 'Batch Started');
+
+          // Call LLM within Retry execution wrapper
+          const rawJsonResult = await this.retryService.execute(async () => {
+            logger.info({ batchIndex: batch.index }, 'LLM Extraction Request');
+            return await this.extractionService.extract(prompt);
+          });
+
+          // Strip markdown backticks if returned
+          let cleanedJson = rawJsonResult.trim();
+          if (cleanedJson.startsWith('```')) {
+            cleanedJson = cleanedJson.replace(/^```json\s*/, '').replace(/```$/, '');
+          }
+
+          const extracted = JSON.parse(cleanedJson);
+          if (!Array.isArray(extracted)) {
+            throw new Error('LLM output is not a JSON array');
+          }
+
+          // Normalize BEFORE validation to maximize valid matches
+          const normalized = await crmTransformer.transform(extracted);
+          logger.info({ batchIndex: batch.index }, 'Transformation Completed');
+
+          // Validate via Zod and check contact skip rules
+          const validation = validateExtractionResponse(normalized, batch.startIndex);
+          succeeded = validation.validRecords;
+
+          validation.skippedRecords.forEach((s) => {
+            failed.push({
+              rowIndex: s.rowIndex,
+              message: s.reason,
+            });
+          });
+          logger.info({ batchIndex: batch.index }, 'Validation Completed');
+
+        } catch (error: any) {
+          logger.error(
+            { err: error.message, batchIndex: batch.index },
+            'Batch Completed with failure'
+          );
+
+          // Fail-tolerance: register failed rows as skipped log entries and continue
+          batch.rows.forEach((_, idx) => {
+            failed.push({
+              rowIndex: batch.startIndex + idx,
+              message: `Batch processing failed: ${error.message}`,
+            });
+          });
+        }
+
+        logger.info(
+          { batchIndex: batch.index, succeededCount: succeeded.length, failedCount: failed.length },
+          'Batch Completed'
+        );
+
+        return {
+          index: batch.index,
+          succeeded,
+          failed,
+        };
+      });
+
+      const chunkResults = await Promise.all(chunkPromises);
+      completedCount += chunk.length;
+      if (onProgress) {
+        onProgress(completedCount, totalBatches);
+      }
+      results.push(...chunkResults);
+    }
+
+    // Sort results by original batch index to preserve original row ordering
+    results.sort((a, b) => a.index - b.index);
 
     return results;
   }
