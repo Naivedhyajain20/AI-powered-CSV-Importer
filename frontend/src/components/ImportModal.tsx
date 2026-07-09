@@ -115,8 +115,25 @@ export default function ImportModal({ onClose, onImportComplete, onLeadsReady }:
     'Generating Final JSON...',
     'Building Summary...',
   ];
-  const stageIdx = STAGES.indexOf(loadingStage);
-  const progressPct = stageIdx < 0 ? 5 : Math.round(((stageIdx + 1) / STAGES.length) * 100);
+
+  // Find the current stage by matching the prefix
+  const stageIdx = STAGES.findIndex((s) => {
+    const prefix = s.replace('...', '');
+    return loadingStage.startsWith(prefix);
+  });
+
+  // Extract percentage if present, e.g., "Extracting CRM Records (80%)..." -> 80
+  const match = loadingStage.match(/\\((\\d+)%\\)/);
+  const subPercent = match ? parseInt(match[1], 10) : 0;
+
+  let progressPct = 5;
+  if (stageIdx >= 0) {
+    const baseProgress = (stageIdx / STAGES.length) * 100;
+    const stepProgress = subPercent 
+      ? (subPercent / 100) * (100 / STAGES.length)
+      : (100 / STAGES.length);
+    progressPct = Math.round(baseProgress + stepProgress);
+  }
 
   return (
     <>
