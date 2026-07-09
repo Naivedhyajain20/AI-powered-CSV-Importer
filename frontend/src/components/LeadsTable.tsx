@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Search, RefreshCw, MoreHorizontal, ChevronDown } from 'lucide-react';
+import { Search, RefreshCw, ChevronDown } from 'lucide-react';
 
 /* ─── Types ──────────────────────────────────────────────── */
 type LeadRow = Record<string, unknown>;
@@ -21,8 +21,12 @@ function getBadgeClass(status: string): string {
 }
 
 function getStatusLabel(status: string): string {
-  if (!status) return 'Not Dialed';
-  return status;
+  const s = (status ?? '').trim().toUpperCase();
+  if (s === 'GOOD_LEAD_FOLLOW_UP') return 'Follow Up';
+  if (s === 'SALE_DONE') return 'Sale Done';
+  if (s === 'DID_NOT_CONNECT') return 'No Answer';
+  if (s === 'BAD_LEAD') return 'Disqualified';
+  return status || 'Not Dialed';
 }
 
 /* ─── Column helpers ─────────────────────────────────────── */
@@ -69,21 +73,21 @@ export default function LeadsTable({ records }: Props) {
       {/* Table toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
-          <h2 style={{ fontWeight: 700, fontSize: 18, color: 'var(--text-primary)', margin: 0 }}>Your Leads</h2>
-          <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '2px 0 0' }}>
+          <h2 style={{ fontWeight: 700, fontSize: 22, color: 'var(--text-primary)', margin: 0 }}>Your Leads</h2>
+          <p style={{ fontSize: 16, color: 'var(--text-secondary)', margin: '2px 0 0' }}>
             {filtered.length} record{filtered.length !== 1 ? 's' : ''} imported
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ position: 'relative' }}>
-            <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <Search size={18} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               placeholder="Search leads…"
               style={{
                 paddingLeft: 32, paddingRight: 12, paddingTop: 8, paddingBottom: 8,
-                border: '1px solid var(--border)', borderRadius: 8, fontSize: 13,
+                border: '1px solid var(--border)', borderRadius: 8, fontSize: 16,
                 color: 'var(--text-primary)', background: '#fff', outline: 'none',
                 width: 220,
               }}
@@ -94,7 +98,7 @@ export default function LeadsTable({ records }: Props) {
             onClick={() => { setSearch(''); setPage(1); }}
             title="Reset"
           >
-            <RefreshCw size={14} />
+            <RefreshCw size={18} />
           </button>
         </div>
       </div>
@@ -118,10 +122,24 @@ export default function LeadsTable({ records }: Props) {
             <tbody>
               {paginated.map((row, i) => {
                 const status = getField(row, 'status');
+                const name = getField(row, 'name');
+                const initials = name && name !== '—'
+                  ? name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+                  : 'LD';
                 return (
                   <tr key={i}>
                     <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                      {getField(row, 'name')}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{
+                          width: 28, height: 28, borderRadius: '50%', background: '#f1f5f9',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 14, fontWeight: 700, color: '#475569', border: '1px solid #e2e8f0',
+                          flexShrink: 0
+                        }}>
+                          {initials}
+                        </div>
+                        <span>{name}</span>
+                      </div>
                     </td>
                     <td style={{ color: 'var(--text-secondary)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {getField(row, 'email')}
@@ -129,7 +147,7 @@ export default function LeadsTable({ records }: Props) {
                     <td style={{ color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>
                       {getField(row, 'phone')}
                     </td>
-                    <td style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap', fontSize: 12.5 }}>
+                    <td style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap', fontSize: 15 }}>
                       {getField(row, 'date')}
                     </td>
                     <td style={{ color: 'var(--text-secondary)' }}>
@@ -143,9 +161,9 @@ export default function LeadsTable({ records }: Props) {
                     <td style={{ color: 'var(--text-muted)' }}>—</td>
                     <td style={{ textAlign: 'right' }}>
                       <button
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: 'var(--accent)', fontWeight: 600, padding: '4px 8px', borderRadius: 6 }}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: 'var(--accent)', fontWeight: 600, padding: '4px 8px', borderRadius: 6 }}
                       >
-                        More <ChevronDown size={13} />
+                        More <ChevronDown size={16} />
                       </button>
                     </td>
                   </tr>
@@ -160,7 +178,7 @@ export default function LeadsTable({ records }: Props) {
           <div style={{ textAlign: 'center', padding: '16px 0', borderTop: '1px solid var(--border)' }}>
             <button
               onClick={() => setPage((p) => p + 1)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14, color: 'var(--accent)' }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}
             >
               Load more
             </button>

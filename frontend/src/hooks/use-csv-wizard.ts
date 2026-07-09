@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import Papa from 'papaparse';
-import { uploadCSV, getMappings, runImport } from '../services/api';
+import { uploadCSV, getMappings, runImport, getImportStatus } from '../services/api';
 import { CSVRecord, ColumnMappingResult, DetailedImportResponse } from '../types/import';
 
 export type WizardStep = 'UPLOAD' | 'PREVIEW' | 'MAPPING' | 'IMPORTING' | 'SUMMARY';
@@ -94,62 +93,72 @@ export const useCsvWizard = () => {
   };
 
   const handleStartImport = async () => {
-    if (!file) return;
+    if (!uploadId) return;
     setStep('IMPORTING');
     setLoading(true);
     setError(null);
 
-    const updateStage = (stage: string, delay: number) => {
-      return new Promise<void>((resolve) =>
-        setTimeout(() => {
-          setLoadingStage(stage);
-          resolve();
-        }, delay)
-      );
-    };
-
     try {
-      setLoadingStage('Uploading CSV...');
-      await updateStage('Preparing Prompt...', 600);
-      await updateStage('Calling Gemini...', 1000);
+      setLoadingStage('Preparing Prompt...');
 
-      // Parse full records client-side using Papaparse
-      Papa.parse<CSVRecord>(file, {
-        header: true,
-        skipEmptyLines: 'greedy',
-        complete: async (results) => {
-          try {
-            await updateStage('Extracting CRM Records...', 800);
-            await updateStage('Validating CRM Schema...', 600);
-            await updateStage('Generating Final JSON...', 600);
+      // Map the simplified key mappings
+      const simplifiedMappings = headerMappings.map((m) => ({
+        sourceHeader: m.sourceHeader,
+        targetField: m.targetField,
+      }));
 
-            // Map the simplified key mappings
-            const simplifiedMappings = headerMappings.map((m) => ({
-              sourceHeader: m.sourceHeader,
-              targetField: m.targetField,
-            }));
+      // Launch import on backend - no client-side parsing, reads from disk!
+      const initResponse = (await runImport(uploadId, simplifiedMappings)) as {
+        metadata?: { jobId?: string };
+      };
+      const jobId = initResponse.metadata?.jobId;
 
-            await updateStage('Building Summary...', 800);
+      if (!jobId) {
+        throw new Error('No Job ID received from import service');
+      }
 
-            const res = await runImport(uploadId, simplifiedMappings, results.data);
-            setImportSummary(res);
-            setStep('SUMMARY');
-          } catch (err: unknown) {
-            setError(maskError(err) || 'Import pipeline failed');
-            setStep('MAPPING');
-          } finally {
-            setLoading(false);
-          }
-        },
-        error: (parseError) => {
-          setError(`Local file parsing failed: ${parseError.message}`);
-          setStep('MAPPING');
-          setLoading(false);
-        },
-      });
+      setLoadingStage('Extracting CRM Records (0%)...');
+
+      // Start status polling
+      let isDone = false;
+      let statusError: string | null = null;
+      let completedResult: DetailedImportResponse | null = null;
+
+      while (!isDone) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const statusResponse = (await getImportStatus(jobId)) as {
+          metadata?: {
+            status?: string;
+            progress?: { percentage?: number };
+          };
+          error?: { message?: string };
+        };
+        
+        if (statusResponse.metadata?.status === 'COMPLETED') {
+          completedResult = statusResponse as unknown as DetailedImportResponse;
+          isDone = true;
+        } else if (statusResponse.metadata?.status === 'FAILED') {
+          statusError = statusResponse.error?.message || 'Background import failed';
+          isDone = true;
+        } else {
+          // Update progress percentage
+          const pct = statusResponse.metadata?.progress?.percentage ?? 0;
+          setLoadingStage(`Extracting CRM Records (${pct}%)...`);
+        }
+      }
+
+      if (statusError) {
+        throw new Error(statusError);
+      }
+
+      if (completedResult) {
+        setImportSummary(completedResult);
+        setStep('SUMMARY');
+      }
     } catch (err: unknown) {
       setError(maskError(err) || 'Import pipeline failed');
       setStep('MAPPING');
+    } finally {
       setLoading(false);
     }
   };

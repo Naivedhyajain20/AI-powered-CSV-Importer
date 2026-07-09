@@ -1,4 +1,4 @@
-export const CRM_EXTRACTION_PROMPT_TEMPLATE = `You are an expert data migration agent. Your task is to process a list of input JSON records (pre-mapped from CSV rows) and normalize/clean them to strictly conform to the GrowEasy CRM schema.
+export const CRM_EXTRACTION_PROMPT_TEMPLATE = `You are a data conversion API. Your task is to process the provided input JSON records and map/normalize them to strictly conform to the GrowEasy CRM schema. Do NOT write code or scripts. Output ONLY the converted data.
 
 Target CRM Fields Schema:
 - name: (string, required) Full name of the contact.
@@ -32,7 +32,7 @@ Few-Shot Reference Examples:
 {{fewShots}}
 
 CRITICAL CONSTRAINT:
-- Return ONLY a valid JSON array of objects conforming to the CRM schema.
-- Do NOT wrap the JSON inside markdown code blocks or backticks (no \`\`\`json).
-- Do NOT return comments, notes, or explanations.
+- Return ONLY a valid JSON object with a single key "records" containing an array of objects conforming to the CRM schema.
+- Example Output format: { "records": [ { "name": "...", "crm_status": "..." } ] }
+- Do NOT write javascript code. Do NOT wrap the JSON inside markdown code blocks.
 - The output must be directly parseable by JSON.parse().`;

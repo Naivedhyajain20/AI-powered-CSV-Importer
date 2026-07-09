@@ -1,7 +1,6 @@
 import {
   UploadResponse,
   MappingResponse,
-  DetailedImportResponse,
   ColumnMapping,
   CSVRecord,
 } from '../types/import';
@@ -49,8 +48,8 @@ export const getMappings = async (
 export const runImport = async (
   uploadId: string,
   mappings: ColumnMapping[],
-  records: CSVRecord[]
-): Promise<DetailedImportResponse> => {
+  records?: CSVRecord[]
+): Promise<unknown> => {
   const res = await fetch(`${API_BASE_URL}/imports/import`, {
     method: 'POST',
     headers: {
@@ -64,5 +63,14 @@ export const runImport = async (
     throw new Error(errorData?.error?.message || `Import failed with status ${res.status}`);
   }
 
+  return res.json();
+};
+
+export const getImportStatus = async (jobId: string): Promise<unknown> => {
+  const res = await fetch(`${API_BASE_URL}/imports/status/${jobId}`);
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData?.error?.message || `Failed to fetch status`);
+  }
   return res.json();
 };

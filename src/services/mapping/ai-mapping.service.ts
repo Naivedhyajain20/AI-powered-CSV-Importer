@@ -6,6 +6,22 @@ import { IGeminiExtractionService } from '../ai/gemini-extraction.service';
 
 const logger = pino();
 
+function cleanAndParseJsonArray(rawJsonResult: string): any[] {
+  let cleanedJson = rawJsonResult.trim();
+  
+  if (cleanedJson.startsWith('```')) {
+    cleanedJson = cleanedJson.replace(/^```(?:json|javascript)?\s*/i, '').replace(/```$/, '').trim();
+  }
+
+  const parsed = JSON.parse(cleanedJson);
+  
+  if (Array.isArray(parsed)) return parsed;
+  if (parsed && Array.isArray(parsed.records)) return parsed.records;
+  if (parsed && Array.isArray(parsed.mappings)) return parsed.mappings;
+  
+  throw new Error('LLM output is not a JSON array or recognizable object wrapper');
+}
+
 export interface IAiMappingService {
   detectMappings(
     headers: string[],
@@ -127,7 +143,7 @@ export class AiMappingService implements IAiMappingService {
       try {
         const prompt = this.promptBuilder.buildMappingPrompt(lowConfidenceHeaders, sampleRows);
         const rawGeminiResponse = await this.geminiService.extract(prompt);
-        const parsedMappings = JSON.parse(rawGeminiResponse);
+        const parsedMappings = cleanAndParseJsonArray(rawGeminiResponse);
 
         if (Array.isArray(parsedMappings)) {
           for (const m of parsedMappings) {

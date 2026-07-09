@@ -11,6 +11,7 @@ const envSchema = z.object({
   LOG_LEVEL: z.string().default('info'),
   MAX_FILE_SIZE_MB: z.coerce.number().default(10),
   DEFAULT_BATCH_SIZE: z.coerce.number().default(50),
+  CONCURRENCY_LIMIT: z.coerce.number().default(3),
 });
 
 export const env = envSchema.parse(process.env);
