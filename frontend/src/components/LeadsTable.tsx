@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Search, RefreshCw, ChevronDown } from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
 
 /* ─── Types ──────────────────────────────────────────────── */
 type LeadRow = Record<string, unknown>;
@@ -29,47 +29,32 @@ function getStatusLabel(status: string): string {
   return status || 'Not Dialed';
 }
 
-/* ─── Column helpers ─────────────────────────────────────── */
-const COL_MAP: Record<string, string[]> = {
-  name:    ['name', 'lead_name', 'full_name', 'contact_name', 'firstName'],
-  email:   ['email', 'email_address', 'mail'],
-  phone:   ['phone', 'mobile', 'contact', 'phone_number', 'mobile_number'],
-  date:    ['created_at', 'date', 'date_created', 'createdAt'],
-  company: ['company', 'organization', 'company_name'],
-  status:  ['crm_status', 'status', 'lead_status', 'disposition'],
-};
-
-function getField(row: LeadRow, key: string): string {
-  const candidates = COL_MAP[key] ?? [key];
-  for (const c of candidates) {
-    for (const k of Object.keys(row)) {
-      if (k.toLowerCase() === c.toLowerCase() && row[k]) return String(row[k]);
-    }
-  }
-  return '—';
-}
-
-const PAGE_SIZE = 10;
-
 export default function LeadsTable({ records }: Props) {
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return records;
     const q = search.toLowerCase();
-    return records.filter((r) =>
-      Object.values(r).some((v) => String(v ?? '').toLowerCase().includes(q))
-    );
+    return records.filter((r) => {
+      if (!r) return false;
+      return Object.values(r).some((v) => String(v ?? '').toLowerCase().includes(q));
+    });
   }, [records, search]);
 
-  const paginated = filtered.slice(0, page * PAGE_SIZE);
-  const hasMore = paginated.length < filtered.length;
+  const columns = useMemo(() => {
+    const keys = new Set<string>();
+    for (const r of records) {
+      if (r) {
+        Object.keys(r).forEach((k) => keys.add(k));
+      }
+    }
+    return Array.from(keys);
+  }, [records]);
 
   if (!records.length) return null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0, height: '100%', flex: 1 }}>
       {/* Table toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
@@ -83,7 +68,7 @@ export default function LeadsTable({ records }: Props) {
             <Search size={18} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Search leads…"
               style={{
                 paddingLeft: 32, paddingRight: 12, paddingTop: 8, paddingBottom: 8,
@@ -95,7 +80,7 @@ export default function LeadsTable({ records }: Props) {
           </div>
           <button
             className="btn-icon btn"
-            onClick={() => { setSearch(''); setPage(1); }}
+            onClick={() => setSearch('')}
             title="Reset"
           >
             <RefreshCw size={18} />
@@ -104,86 +89,70 @@ export default function LeadsTable({ records }: Props) {
       </div>
 
       {/* Table card */}
-      <div className="card" style={{ overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table className="data-table">
-            <thead style={{ background: '#fafafa' }}>
+      <div className="card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 400 }}>
+        <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: 'calc(100vh - 200px)' }}>
+          <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead style={{ background: '#fafafa', position: 'sticky', top: 0, zIndex: 10, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
               <tr>
-                <th>Lead Name</th>
-                <th>Email</th>
-                <th>Contact</th>
-                <th>Date Created</th>
-                <th>Company</th>
-                <th>Status</th>
-                <th>Quality</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                {columns.map((col) => (
+                  <th key={col} style={{ whiteSpace: 'nowrap', padding: '14px 16px', fontWeight: 700, color: 'var(--text-secondary)', fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {col.replace(/_/g, ' ')}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {paginated.map((row, i) => {
-                const status = getField(row, 'status');
-                const name = getField(row, 'name');
-                const initials = name && name !== '—'
-                  ? name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
-                  : 'LD';
+              {filtered.map((row, i) => {
+                if (!row) return null;
                 return (
-                  <tr key={i}>
-                    <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{
-                          width: 28, height: 28, borderRadius: '50%', background: '#f1f5f9',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 14, fontWeight: 700, color: '#475569', border: '1px solid #e2e8f0',
-                          flexShrink: 0
-                        }}>
-                          {initials}
-                        </div>
-                        <span>{name}</span>
-                      </div>
-                    </td>
-                    <td style={{ color: 'var(--text-secondary)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {getField(row, 'email')}
-                    </td>
-                    <td style={{ color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>
-                      {getField(row, 'phone')}
-                    </td>
-                    <td style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap', fontSize: 15 }}>
-                      {getField(row, 'date')}
-                    </td>
-                    <td style={{ color: 'var(--text-secondary)' }}>
-                      {getField(row, 'company')}
-                    </td>
-                    <td>
-                      <span className={getBadgeClass(status)}>
-                        {getStatusLabel(status)}
-                      </span>
-                    </td>
-                    <td style={{ color: 'var(--text-muted)' }}>—</td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: 'var(--accent)', fontWeight: 600, padding: '4px 8px', borderRadius: 6 }}
-                      >
-                        More <ChevronDown size={16} />
-                      </button>
-                    </td>
+                  <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                    {columns.map((col) => {
+                      const valStr = String(row[col] ?? '—');
+                      
+                      // Format Name Beautifully
+                      if (col.toLowerCase().includes('name') && valStr !== '—') {
+                        const initials = valStr.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || 'LD';
+                        return (
+                          <td key={col} style={{ fontWeight: 600, color: 'var(--text-primary)', padding: '12px 16px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <div style={{
+                                width: 28, height: 28, borderRadius: '50%', background: '#f1f5f9',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: 14, fontWeight: 700, color: '#475569', border: '1px solid #e2e8f0',
+                                flexShrink: 0
+                              }}>
+                                {initials}
+                              </div>
+                              <span style={{ whiteSpace: 'nowrap' }}>{valStr}</span>
+                            </div>
+                          </td>
+                        );
+                      }
+
+                      // Format Status Beautifully
+                      if (col.toLowerCase().includes('status') && valStr !== '—') {
+                        return (
+                          <td key={col} style={{ padding: '12px 16px' }}>
+                            <span className={getBadgeClass(valStr)}>
+                              {getStatusLabel(valStr)}
+                            </span>
+                          </td>
+                        );
+                      }
+
+                      // Standard cell
+                      return (
+                        <td key={col} style={{ color: 'var(--text-secondary)', padding: '12px 16px', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {valStr}
+                        </td>
+                      );
+                    })}
                   </tr>
                 );
               })}
             </tbody>
           </table>
         </div>
-
-        {/* Load more */}
-        {hasMore && (
-          <div style={{ textAlign: 'center', padding: '16px 0', borderTop: '1px solid var(--border)' }}>
-            <button
-              onClick={() => setPage((p) => p + 1)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 18, color: 'var(--accent)' }}
-            >
-              Load more
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
