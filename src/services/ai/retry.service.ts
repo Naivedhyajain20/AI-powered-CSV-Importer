@@ -34,12 +34,14 @@ export class RetryService implements IRetryService {
         }
 
         this.retryCount++;
-        const jitter = Math.random() * 200;
-        const backoffDelay = delay * 2 + jitter;
+        const isRateLimit = error.message.toLowerCase().includes('rate limit') || error.message.includes('429');
+        const baseDelay = isRateLimit ? 7000 : delay;
+        const jitter = Math.random() * 500;
+        const backoffDelay = baseDelay * 2 + jitter;
 
         logger.warn(
           { err: error.message, attempt, backoffDelay },
-          'Retry Attempt'
+          `Retry Attempt (${isRateLimit ? 'Rate Limit Aware' : 'Standard'})`
         );
 
         await new Promise((resolve) => setTimeout(resolve, backoffDelay));

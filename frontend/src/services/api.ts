@@ -48,7 +48,7 @@ export const getMappings = async (
 export const runImport = async (
   uploadId: string,
   mappings: ColumnMapping[],
-  records: CSVRecord[]
+  records?: CSVRecord[]
 ): Promise<unknown> => {
   const res = await fetch(`${API_BASE_URL}/imports/import`, {
     method: 'POST',

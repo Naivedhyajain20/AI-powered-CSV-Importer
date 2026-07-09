@@ -18,24 +18,26 @@ export const FEW_SHOT_EXAMPLES = [
         description: "Hot prospect"
       }
     ],
-    output: [
-      {
-        name: "John Doe",
-        email: "john@example.com",
-        country_code: "+1",
-        mobile_without_country_code: "5550192834",
-        company: "Acme Corp",
-        city: "New York",
-        state: "NY",
-        country: "USA",
-        lead_owner: "Sarah Connor",
-        crm_status: "GOOD_LEAD_FOLLOW_UP",
-        crm_note: "Met at conference [Additional Emails: admin@example.com]",
-        data_source: null,
-        possession_time: "2026-05-12",
-        created_at: "2026-07-08",
-        description: "Hot prospect"
-      }
-    ]
+    output: {
+      records: [
+        {
+          name: "John Doe",
+          email: "john@example.com",
+          country_code: "+1",
+          mobile_without_country_code: "5550192834",
+          company: "Acme Corp",
+          city: "New York",
+          state: "NY",
+          country: "USA",
+          lead_owner: "Sarah Connor",
+          crm_status: "GOOD_LEAD_FOLLOW_UP",
+          crm_note: "Met at conference [Additional Emails: admin@example.com]",
+          data_source: null,
+          possession_time: "2026-05-12",
+          created_at: "2026-07-08",
+          description: "Hot prospect"
+        }
+      ]
+    }
   }
 ];

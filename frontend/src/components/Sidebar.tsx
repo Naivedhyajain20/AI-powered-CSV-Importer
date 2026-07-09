@@ -22,9 +22,9 @@ type SidebarProps = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { icon: <LayoutDashboard size={16} />, label: 'Dashboard', id: 'dashboard' },
-  { icon: <Users size={16} />, label: 'Leads Directory', id: 'leads' },
-  { icon: <Settings2 size={16} />, label: 'API Settings', id: 'settings' },
+  { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
+  { icon: <Users size={20} />, label: 'Leads Directory', id: 'leads' },
+  { icon: <Settings2 size={20} />, label: 'API Settings', id: 'settings' },
 ];
 
 export default function Sidebar({ activeTab, onTabChange, onGoToLanding }: SidebarProps) {
@@ -33,7 +33,7 @@ export default function Sidebar({ activeTab, onTabChange, onGoToLanding }: Sideb
       {/* Logo */}
       <div className="sidebar-logo" onClick={onGoToLanding} style={{ cursor: 'pointer' }}>
         <div className="sidebar-logo-icon">GE</div>
-        <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.3px', color: 'var(--text-primary)' }}>
+        <span style={{ fontWeight: 700, fontSize: 18, letterSpacing: '-0.3px', color: 'var(--text-primary)' }}>
           GrowEasy
         </span>
       </div>
@@ -42,14 +42,14 @@ export default function Sidebar({ activeTab, onTabChange, onGoToLanding }: Sideb
       <div className="sidebar-profile" onClick={onGoToLanding}>
         <div className="sidebar-profile-avatar">VK</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             VK Test
           </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <div style={{ fontSize: 14, color: 'var(--text-muted)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Owner
           </div>
         </div>
-        <ChevronRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+        <ChevronRight size={18} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
       </div>
 
       {/* Main Nav */}
@@ -75,7 +75,7 @@ export default function Sidebar({ activeTab, onTabChange, onGoToLanding }: Sideb
           className="sidebar-nav-item"
           style={{ width: 'calc(100% - 12px)', border: 'none', background: 'none', textAlign: 'left' }}
         >
-          <LogOut size={16} />
+          <LogOut size={20} />
           <span>Exit Workspace</span>
         </button>
       </div>

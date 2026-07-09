@@ -1,4 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
+import path from 'path';
+import fs from 'fs';
+import readline from 'readline';
 import pino from 'pino';
 import { env } from '../config/env';
 import { ISchemaValidationService } from '../services/mapping/schema-validation.service';
@@ -8,6 +11,28 @@ import { ISummaryBuilderService } from '../services/import/summary-builder.servi
 import { IRetryService } from '../services/ai/retry.service';
 
 const logger = pino();
+
+async function countRows(filePath: string): Promise<number> {
+  return new Promise((resolve, reject) => {
+    let count = 0;
+    const rl = readline.createInterface({
+      input: fs.createReadStream(filePath),
+      crlfDelay: Infinity,
+    });
+
+    rl.on('line', () => {
+      count++;
+    });
+
+    rl.on('close', () => {
+      resolve(Math.max(0, count - 1));
+    });
+
+    rl.on('error', (err) => {
+      reject(err);
+    });
+  });
+}
 
 interface JobStatus {
   status: 'PROCESSING' | 'COMPLETED' | 'FAILED';
@@ -39,15 +64,19 @@ export class ImportController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const { uploadId, jobId, mappings, records } = req.body;
+      const { uploadId, jobId, mappings, records, totalRows } = req.body;
       const targetJobId = uploadId || jobId || `job_${Date.now()}`;
+      const filePath = path.join(process.cwd(), 'uploads', `${uploadId}.csv`);
 
-      if (!records || !Array.isArray(records) || records.length === 0) {
+      const hasMemoryRecords = records && Array.isArray(records) && records.length > 0;
+      const hasDiskFile = fs.existsSync(filePath);
+
+      if (!hasMemoryRecords && !hasDiskFile) {
         res.status(400).json({
           success: false,
           error: {
             code: 'MISSING_RECORDS',
-            message: 'No CSV records provided for import processing',
+            message: 'No CSV records or valid uploadId provided for import processing',
           },
         });
         return;
@@ -67,12 +96,22 @@ export class ImportController {
         return;
       }
 
+      let calculatedTotalRows = totalRows || 0;
+      if (!hasMemoryRecords && hasDiskFile && !calculatedTotalRows) {
+        calculatedTotalRows = await countRows(filePath);
+      }
+
+      const batchSize = env.DEFAULT_BATCH_SIZE || 10;
+      const totalBatchesEstimate = hasMemoryRecords
+        ? Math.ceil(records.length / batchSize)
+        : Math.ceil(calculatedTotalRows / batchSize);
+
       // Initialize the background job
       jobStore[targetJobId] = {
         status: 'PROCESSING',
         progress: {
           percentage: 0,
-          totalBatches: 0,
+          totalBatches: totalBatchesEstimate,
           completedBatches: 0,
           failedBatches: 0,
         },
@@ -80,29 +119,48 @@ export class ImportController {
 
       // 2. Trigger asynchronous background processing (without awaiting)
       const startTime = Date.now();
-      const batchSize = env.DEFAULT_BATCH_SIZE || 10;
 
       // Run task in background
       (async () => {
         try {
           this.retryService.resetRetryCount();
 
-          const batchResults = await this.batchProcessor.process(
-            records,
-            mappings,
-            batchSize,
-            (completed, total) => {
-              // Progress callback
-              const percentage = Math.round((completed / total) * 100);
-              jobStore[targetJobId].progress = {
-                percentage,
-                totalBatches: total,
-                completedBatches: completed,
-                failedBatches: 0, // fails are handled gracefully in results
-              };
-              logger.info({ jobId: targetJobId, progress: percentage }, 'Job Progress Updated');
-            }
-          );
+          let batchResults;
+          if (hasMemoryRecords) {
+            batchResults = await this.batchProcessor.process(
+              records,
+              mappings,
+              batchSize,
+              (completed, total) => {
+                const percentage = Math.round((completed / total) * 100);
+                jobStore[targetJobId].progress = {
+                  percentage,
+                  totalBatches: total,
+                  completedBatches: completed,
+                  failedBatches: 0,
+                };
+                logger.info({ jobId: targetJobId, progress: percentage }, 'Job Progress Updated');
+              }
+            );
+          } else {
+            batchResults = await this.batchProcessor.processStream(
+              filePath,
+              mappings,
+              calculatedTotalRows,
+              batchSize,
+              (processedRows, totalRowsCount, completed, failed) => {
+                const total = Math.ceil(totalRowsCount / batchSize) || 1;
+                const percentage = Math.round((completed / total) * 100);
+                jobStore[targetJobId].progress = {
+                  percentage: Math.min(100, percentage),
+                  totalBatches: total,
+                  completedBatches: completed,
+                  failedBatches: failed,
+                };
+                logger.info({ jobId: targetJobId, progress: percentage }, 'Stream Job Progress Updated');
+              }
+            );
+          }
 
           const processingTimeMs = Date.now() - startTime;
           const retryCount = this.retryService.getRetryCount();
@@ -126,6 +184,16 @@ export class ImportController {
           logger.error({ jobId: targetJobId, err: error.message }, 'Background Job Failed');
           jobStore[targetJobId].status = 'FAILED';
           jobStore[targetJobId].error = error.message;
+        } finally {
+          // Cleanup disk file
+          if (fs.existsSync(filePath)) {
+            try {
+              fs.unlinkSync(filePath);
+              logger.info({ filePath }, 'Temporary CSV file deleted');
+            } catch (err: any) {
+              logger.error({ filePath, err: err.message }, 'Failed to delete temporary CSV file');
+            }
+          }
         }
       })();
 
@@ -137,7 +205,7 @@ export class ImportController {
           status: 'PROCESSING',
           progress: {
             percentage: 0,
-            totalBatches: Math.ceil(records.length / batchSize),
+            totalBatches: totalBatchesEstimate,
             completedBatches: 0,
             failedBatches: 0,
           },
@@ -175,8 +243,11 @@ export class ImportController {
             jobId,
             status: 'COMPLETED',
             progress: job.progress,
+            ...job.result.metadata
           },
-          ...job.result,
+          importedRecords: job.result.importedRecords,
+          skippedRecords: job.result.skippedRecords,
+          failedRecords: job.result.failedRecords,
         });
       } else if (job.status === 'FAILED') {
         res.status(200).json({

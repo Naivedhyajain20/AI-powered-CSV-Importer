@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import Papa from 'papaparse';
 import { uploadCSV, getMappings, runImport, getImportStatus } from '../services/api';
 import { CSVRecord, ColumnMappingResult, DetailedImportResponse } from '../types/import';
 
@@ -94,100 +93,72 @@ export const useCsvWizard = () => {
   };
 
   const handleStartImport = async () => {
-    if (!file) return;
+    if (!uploadId) return;
     setStep('IMPORTING');
     setLoading(true);
     setError(null);
 
-    const updateStage = (stage: string, delay: number) => {
-      return new Promise<void>((resolve) =>
-        setTimeout(() => {
-          setLoadingStage(stage);
-          resolve();
-        }, delay)
-      );
-    };
-
     try {
-      setLoadingStage('Uploading CSV...');
-      await updateStage('Preparing Prompt...', 400);
+      setLoadingStage('Preparing Prompt...');
 
-      // Parse full records client-side using Papaparse
-      Papa.parse<CSVRecord>(file, {
-        header: true,
-        skipEmptyLines: 'greedy',
-        complete: async (results) => {
-          try {
-            await updateStage('Extracting CRM Records...', 400);
+      // Map the simplified key mappings
+      const simplifiedMappings = headerMappings.map((m) => ({
+        sourceHeader: m.sourceHeader,
+        targetField: m.targetField,
+      }));
 
-            // Map the simplified key mappings
-            const simplifiedMappings = headerMappings.map((m) => ({
-              sourceHeader: m.sourceHeader,
-              targetField: m.targetField,
-            }));
+      // Launch import on backend - no client-side parsing, reads from disk!
+      const initResponse = (await runImport(uploadId, simplifiedMappings)) as {
+        metadata?: { jobId?: string };
+      };
+      const jobId = initResponse.metadata?.jobId;
 
-            // Launch import on backend
-            const initResponse = (await runImport(uploadId, simplifiedMappings, results.data)) as {
-              metadata?: { jobId?: string };
-            };
-            const jobId = initResponse.metadata?.jobId;
+      if (!jobId) {
+        throw new Error('No Job ID received from import service');
+      }
 
-            if (!jobId) {
-              throw new Error('No Job ID received from import service');
-            }
+      setLoadingStage('Extracting CRM Records (0%)...');
 
-            // Start status polling
-            let isDone = false;
-            let statusError: string | null = null;
-            let completedResult: DetailedImportResponse | null = null;
+      // Start status polling
+      let isDone = false;
+      let statusError: string | null = null;
+      let completedResult: DetailedImportResponse | null = null;
 
-            while (!isDone) {
-              await new Promise((resolve) => setTimeout(resolve, 1500));
-              const statusResponse = (await getImportStatus(jobId)) as {
-                metadata?: {
-                  status?: string;
-                  progress?: { percentage?: number };
-                };
-                error?: { message?: string };
-              };
-              
-              if (statusResponse.metadata?.status === 'COMPLETED') {
-                completedResult = statusResponse as unknown as DetailedImportResponse;
-                isDone = true;
-              } else if (statusResponse.metadata?.status === 'FAILED') {
-                statusError = statusResponse.error?.message || 'Background import failed';
-                isDone = true;
-              } else {
-                // Update progress percentage
-                const pct = statusResponse.metadata?.progress?.percentage ?? 0;
-                setLoadingStage(`Extracting CRM Records (${pct}%)...`);
-              }
-            }
+      while (!isDone) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const statusResponse = (await getImportStatus(jobId)) as {
+          metadata?: {
+            status?: string;
+            progress?: { percentage?: number };
+          };
+          error?: { message?: string };
+        };
+        
+        if (statusResponse.metadata?.status === 'COMPLETED') {
+          completedResult = statusResponse as unknown as DetailedImportResponse;
+          isDone = true;
+        } else if (statusResponse.metadata?.status === 'FAILED') {
+          statusError = statusResponse.error?.message || 'Background import failed';
+          isDone = true;
+        } else {
+          // Update progress percentage
+          const pct = statusResponse.metadata?.progress?.percentage ?? 0;
+          setLoadingStage(`Extracting CRM Records (${pct}%)...`);
+        }
+      }
 
-            if (statusError) {
-              throw new Error(statusError);
-            }
+      if (statusError) {
+        throw new Error(statusError);
+      }
 
-            if (completedResult) {
-              setImportSummary(completedResult);
-              setStep('SUMMARY');
-            }
-          } catch (err: unknown) {
-            setError(maskError(err) || 'Import pipeline failed');
-            setStep('MAPPING');
-          } finally {
-            setLoading(false);
-          }
-        },
-        error: (parseError) => {
-          setError(`Local file parsing failed: ${parseError.message}`);
-          setStep('MAPPING');
-          setLoading(false);
-        },
-      });
+      if (completedResult) {
+        setImportSummary(completedResult);
+        setStep('SUMMARY');
+      }
     } catch (err: unknown) {
       setError(maskError(err) || 'Import pipeline failed');
       setStep('MAPPING');
+    } finally {
       setLoading(false);
     }
   };
