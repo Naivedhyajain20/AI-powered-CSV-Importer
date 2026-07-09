@@ -10,59 +10,40 @@ export interface IGeminiExtractionService {
 
 export class GeminiExtractionService implements IGeminiExtractionService {
   async extract(prompt: string): Promise<string> {
-    const timeoutMs = 45000;
+    const timeoutMs = 90000;
     const timeoutPromise = new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error('LLM_API_TIMEOUT')), timeoutMs)
     );
 
     const callPromise = (async () => {
-      if (env.GROQ_API_KEY) {
-        logger.info('Routing LLM extraction to Groq Cloud API');
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${env.GROQ_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: 'llama-3.1-8b-instant',
-            messages: [
-              {
-                role: 'user',
-                content: prompt,
-              },
-            ],
-            temperature: 0,
-            max_tokens: 1500,
-            response_format: { type: 'json_object' }
-          }),
-        });
-
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          throw new Error(body?.error?.message || `Groq API failed with status ${response.status}`);
-        }
-
-        const data = await response.json();
-        const content = data?.choices?.[0]?.message?.content;
-        if (!content) {
-          throw new Error('Groq API returned an empty completion response');
-        }
-        return content.trim();
-      } else {
-        logger.info('Routing LLM extraction to Gemini API');
-        const model = genAI.getGenerativeModel({
-          model: GEMINI_MODEL,
-          generationConfig: {
-            temperature: 0,
-            topP: 0,
-            topK: 1,
-            responseMimeType: 'application/json',
-          },
-        });
-        const result = await model.generateContent(prompt);
-        return result.response.text().trim();
+      logger.info('Routing LLM extraction to Groq API (Llama 3.1 8B)');
+      
+      if (!env.GROQ_API_KEY) {
+        throw new Error('GROQ_API_KEY is not defined in environment variables');
       }
+
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${env.GROQ_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          messages: [
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0,
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Groq API Error: ${response.status} ${errorText}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content.trim();
     })();
 
     return Promise.race([callPromise, timeoutPromise]);

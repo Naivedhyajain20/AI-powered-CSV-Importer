@@ -124,14 +124,14 @@ export default function ImportModal({ onClose, onImportComplete, onLeadsReady }:
       {step === 'IMPORTING' && (
         <div className="import-overlay">
           <div style={{
-            background: '#fff', borderRadius: 20, padding: 36, maxWidth: 420, width: '100%',
+            background: 'var(--bg-card)', borderRadius: 20, padding: 36, maxWidth: 420, width: '100%',
             display: 'flex', flexDirection: 'column', gap: 24,
           }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ position: 'relative', display: 'inline-block', marginBottom: 16 }}>
                 <div style={{
                   width: 72, height: 72, borderRadius: '50%',
-                  border: '4px solid #e5e7eb', borderTopColor: '#16a34a',
+                  border: '4px solid var(--border)', borderTopColor: '#16a34a',
                   animation: 'spin 0.9s linear infinite',
                 }} />
                 <Sparkles size={24} style={{ position: 'absolute', top: 18, left: 18, color: '#16a34a', animation: 'pulse 2s ease-in-out infinite' }} />
@@ -141,7 +141,7 @@ export default function ImportModal({ onClose, onImportComplete, onLeadsReady }:
             </div>
 
             {/* Progress bar */}
-            <div style={{ background: '#f3f4f6', borderRadius: 99, height: 6, overflow: 'hidden' }}>
+            <div style={{ background: 'var(--bg-hover)', borderRadius: 99, height: 6, overflow: 'hidden' }}>
               <div style={{
                 background: 'var(--accent)', height: '100%', borderRadius: 99,
                 width: `${progressPct}%`, transition: 'width 0.7s ease',
@@ -159,7 +159,7 @@ export default function ImportModal({ onClose, onImportComplete, onLeadsReady }:
                       ? <CheckCircle2 size={20} style={{ color: '#16a34a', flexShrink: 0 }} />
                       : active
                         ? <Loader2 size={20} style={{ color: '#16a34a', flexShrink: 0, animation: 'spin 0.8s linear infinite' }} />
-                        : <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid #d1d5db', flexShrink: 0 }} />
+                        : <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid var(--border-hover)', flexShrink: 0 }} />
                     }
                     <span style={{
                       fontSize: 16,
@@ -198,7 +198,7 @@ export default function ImportModal({ onClose, onImportComplete, onLeadsReady }:
               </div>
               <button
                 onClick={handleClose}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-muted)', borderRadius: 6, display: 'flex', alignItems: 'center' }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-muted)', borderRadius: 6, display: 'flex', alignItems: 'center' }}
               >
                 <X size={24} />
               </button>
@@ -221,14 +221,14 @@ export default function ImportModal({ onClose, onImportComplete, onLeadsReady }:
                   onDragEnter={handleDrag} onDragOver={handleDrag} onDragLeave={handleDrag} onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <div style={{ width: 48, height: 48, background: '#f3f4f6', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-                    <UploadCloud size={28} style={{ color: '#6b7280' }} />
+                  <div style={{ width: 48, height: 48, background: 'var(--bg-hover)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+                    <UploadCloud size={28} style={{ color: 'var(--text-muted)' }} />
                   </div>
                   <div style={{ fontWeight: 700, fontSize: 18, color: 'var(--text-primary)', marginBottom: 4 }}>
                     Drop your CSV file here
                   </div>
                   <div style={{ fontSize: 16, color: 'var(--text-secondary)' }}>or click to browse files</div>
-                  <div style={{ marginTop: 14, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', background: '#f9fafb', border: '1px solid var(--border)', borderRadius: 99, fontSize: 15, color: 'var(--text-secondary)' }}>
+                  <div style={{ marginTop: 14, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', background: 'var(--bg-page)', border: '1px solid var(--border)', borderRadius: 99, fontSize: 15, color: 'var(--text-secondary)' }}>
                     <AlertCircle size={15} />
                     Supported file: .csv (max 5MB)
                   </div>
@@ -251,8 +251,8 @@ export default function ImportModal({ onClose, onImportComplete, onLeadsReady }:
             {step === 'PREVIEW' && metadata && (
               <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {/* File badge */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', border: '1px solid var(--border)', borderRadius: 10, background: '#f9fafb' }}>
-                  <div style={{ width: 36, height: 36, background: '#dcfce7', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--bg-page)' }}>
+                  <div style={{ width: 36, height: 36, background: 'var(--badge-good-bg)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <FileText size={20} style={{ color: '#16a34a' }} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -263,7 +263,7 @@ export default function ImportModal({ onClose, onImportComplete, onLeadsReady }:
                   </div>
                   <button
                     onClick={handleClose}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}
                   >
                     <X size={20} />
                   </button>
@@ -276,7 +276,7 @@ export default function ImportModal({ onClose, onImportComplete, onLeadsReady }:
                     { label: 'Columns', value: metadata.detectedColumns },
                     { label: 'Preview', value: `${previewRows.length} rows` },
                   ].map((s) => (
-                    <div key={s.label} style={{ textAlign: 'center', padding: '10px 8px', background: '#f9fafb', border: '1px solid var(--border)', borderRadius: 10 }}>
+                    <div key={s.label} style={{ textAlign: 'center', padding: '10px 8px', background: 'var(--bg-page)', border: '1px solid var(--border)', borderRadius: 10 }}>
                       <div style={{ fontWeight: 700, fontSize: 22, color: 'var(--text-primary)' }}>{s.value}</div>
                       <div style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 2 }}>{s.label}</div>
                     </div>
@@ -287,7 +287,7 @@ export default function ImportModal({ onClose, onImportComplete, onLeadsReady }:
                 <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
                   <div style={{ overflowX: 'auto', maxHeight: 260 }}>
                     <table className="data-table">
-                      <thead style={{ background: '#f9fafb', position: 'sticky', top: 0 }}>
+                      <thead style={{ background: 'var(--bg-page)', position: 'sticky', top: 0 }}>
                         <tr>
                           {headers.slice(0, 6).map((h) => <th key={h}>{h}</th>)}
                           {headers.length > 6 && <th>+{headers.length - 6} more</th>}
@@ -347,7 +347,7 @@ export default function ImportModal({ onClose, onImportComplete, onLeadsReady }:
                               updated[idx] = { ...updated[idx], targetField: e.target.value || null };
                               setHeaderMappings(updated);
                             }}
-                            style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', fontSize: 15, color: 'var(--text-primary)', background: '#fff', width: '100%', cursor: 'pointer' }}
+                            style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', fontSize: 15, color: 'var(--text-primary)', background: 'var(--bg-card)', width: '100%', cursor: 'pointer' }}
                           >
                             <option value="">— Skip —</option>
                             {TARGET_CRM_FIELDS.map((f) => (
@@ -375,7 +375,7 @@ export default function ImportModal({ onClose, onImportComplete, onLeadsReady }:
                     { label: 'Skipped', value: importSummary.metadata.skippedRows, color: '#d97706' },
                     { label: 'Total', value: importSummary.metadata.totalRows, color: '#6366f1' },
                   ].map((s) => (
-                    <div key={s.label} style={{ textAlign: 'center', padding: '14px 8px', background: '#f9fafb', border: '1px solid var(--border)', borderRadius: 12 }}>
+                    <div key={s.label} style={{ textAlign: 'center', padding: '14px 8px', background: 'var(--bg-page)', border: '1px solid var(--border)', borderRadius: 12 }}>
                       <div style={{ fontWeight: 800, fontSize: 32, color: s.color }}>{s.value}</div>
                       <div style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 2, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
                     </div>
@@ -384,14 +384,14 @@ export default function ImportModal({ onClose, onImportComplete, onLeadsReady }:
 
                 {/* Skipped rows log */}
                 {importSummary.skippedRecords.length > 0 && (
-                  <div style={{ border: '1px solid #fde68a', borderRadius: 10, overflow: 'hidden' }}>
-                    <div style={{ padding: '8px 14px', background: '#fffbeb', borderBottom: '1px solid #fde68a', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ border: '1px solid rgba(217, 119, 6, 0.3)', borderRadius: 10, overflow: 'hidden' }}>
+                    <div style={{ padding: '8px 14px', background: 'rgba(217, 119, 6, 0.1)', borderBottom: '1px solid rgba(217, 119, 6, 0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: 15, fontWeight: 700, color: '#92400e' }}>⚠ Skipped Rows</span>
                       <span style={{ fontSize: 14, color: '#b45309' }}>{importSummary.skippedRecords.length} row(s)</span>
                     </div>
                     <div style={{ maxHeight: 120, overflowY: 'auto' }}>
                       {importSummary.skippedRecords.map((r, i) => (
-                        <div key={i} style={{ padding: '8px 14px', fontSize: 15, borderBottom: '1px solid #fef3c7', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                        <div key={i} style={{ padding: '8px 14px', fontSize: 15, borderBottom: '1px solid rgba(217, 119, 6, 0.1)', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                           <AlertCircle size={16} style={{ color: '#d97706', marginTop: 1, flexShrink: 0 }} />
                           <span><strong>Row #{r.rowIndex + 1}</strong> — {r.reason}</span>
                         </div>
@@ -402,7 +402,7 @@ export default function ImportModal({ onClose, onImportComplete, onLeadsReady }:
 
                 {/* JSON viewer */}
                 <div style={{ border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-                  <div style={{ padding: '10px 14px', background: '#f9fafb', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ padding: '10px 14px', background: 'var(--bg-page)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                       <Database size={18} style={{ color: 'var(--accent)' }} />
                       <span style={{ fontSize: 15, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)' }}>Generated CRM Records</span>

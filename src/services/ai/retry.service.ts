@@ -19,7 +19,7 @@ export class RetryService implements IRetryService {
     this.retryCount = 0;
   }
 
-  async execute<T>(operation: () => Promise<T>, maxRetries = 3): Promise<T> {
+  async execute<T>(operation: () => Promise<T>, maxRetries = 15): Promise<T> {
     let delay = 1000;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -35,9 +35,9 @@ export class RetryService implements IRetryService {
 
         this.retryCount++;
         const isRateLimit = error.message.toLowerCase().includes('rate limit') || error.message.includes('429');
-        const baseDelay = isRateLimit ? 7000 : delay;
+        const baseDelay = isRateLimit ? 65000 : delay; // Wait 65s for strict 429 quota errors
         const jitter = Math.random() * 500;
-        const backoffDelay = baseDelay * 2 + jitter;
+        const backoffDelay = isRateLimit ? baseDelay : baseDelay * 2 + jitter;
 
         logger.warn(
           { err: error.message, attempt, backoffDelay },

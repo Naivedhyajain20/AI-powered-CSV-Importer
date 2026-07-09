@@ -78,9 +78,9 @@ export class BatchProcessorService implements IBatchProcessorService {
     const crmTransformer = new CrmTransformationService();
     const results: BatchResult[] = [];
     
-    // Concurrency Limit: Process at most 2 batches in parallel at any one time.
+    // Concurrency Limit: Process at most 1 batch in parallel at any one time.
     // This staggers requests and prevents exceeding Groq free tier TPM rate limit spikes.
-    const concurrency = 2;
+    const concurrency = 1;
     let completedCount = 0;
     const totalBatches = batches.length;
 
@@ -99,7 +99,7 @@ export class BatchProcessorService implements IBatchProcessorService {
 
           logger.info({ batchIndex: batch.index, rowsCount: batch.rows.length }, 'Batch Started');
 
-          // Call LLM within Retry execution wrapper
+          // Call LLM within Retry execution wrapper (Restored AI logic)
           const rawJsonResult = await this.retryService.execute(async () => {
             logger.info({ batchIndex: batch.index }, 'LLM Extraction Request');
             return await this.extractionService.extract(prompt);
@@ -173,7 +173,7 @@ export class BatchProcessorService implements IBatchProcessorService {
   ): Promise<BatchResult[]> {
     return new Promise((resolve, reject) => {
       const results: BatchResult[] = [];
-      const concurrency = env.CONCURRENCY_LIMIT || 3;
+      const concurrency = env.CONCURRENCY_LIMIT || 1;
       let completedBatches = 0;
       let failedBatches = 0;
       let processedRowsCount = 0;
@@ -207,7 +207,7 @@ export class BatchProcessorService implements IBatchProcessorService {
 
             logger.info({ batchIndex: batchIdx, rowsCount: cleanedRows.length }, 'Stream Batch Started');
 
-            // Call LLM within Retry execution wrapper
+            // Call LLM within Retry execution wrapper (Restored AI logic)
             const rawJsonResult = await this.retryService.execute(async () => {
               logger.info({ batchIndex: batchIdx }, 'Stream LLM Extraction Request');
               return await this.extractionService.extract(prompt);
