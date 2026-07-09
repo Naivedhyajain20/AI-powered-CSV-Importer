@@ -101,7 +101,7 @@ export class ImportController {
         calculatedTotalRows = await countRows(filePath);
       }
 
-      const batchSize = env.DEFAULT_BATCH_SIZE || 10;
+      const batchSize = env.DEFAULT_BATCH_SIZE; // Controlled via .env for rate limit optimization
       const totalBatchesEstimate = hasMemoryRecords
         ? Math.ceil(records.length / batchSize)
         : Math.ceil(calculatedTotalRows / batchSize);

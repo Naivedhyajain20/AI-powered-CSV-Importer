@@ -27,7 +27,7 @@ export class CrmTransformationService implements ICrmTransformationService {
       const rawPhone = copy.mobile_without_country_code ?? copy.phone ?? '';
       let phoneParts: string[] = [];
       if (typeof rawPhone === 'string' || typeof rawPhone === 'number') {
-        phoneParts = String(rawPhone).split(/[;,|\s]+/).map((p) => p.trim()).filter(Boolean);
+        phoneParts = String(rawPhone).split(/[;,|]+/).map((p) => p.trim()).filter(Boolean);
       }
       const primaryPhoneStr = phoneParts[0] || '';
       const phoneResult = parsePhone(primaryPhoneStr);

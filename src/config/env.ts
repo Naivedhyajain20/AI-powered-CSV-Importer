@@ -8,9 +8,10 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   GEMINI_API_KEY: z.string().optional(),
   GROQ_API_KEY: z.string().optional(),
+  OPENROUTER_API_KEY: z.string().optional(),
   LOG_LEVEL: z.string().default('info'),
   MAX_FILE_SIZE_MB: z.coerce.number().default(10),
-  DEFAULT_BATCH_SIZE: z.coerce.number().default(50),
+  DEFAULT_BATCH_SIZE: z.coerce.number().default(10),
   CONCURRENCY_LIMIT: z.coerce.number().default(3),
 });
 
