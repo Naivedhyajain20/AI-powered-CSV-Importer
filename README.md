@@ -276,7 +276,7 @@ GEMINI_API_KEY=
 
 - **Portfolio:** [https://naivedhyajain.engineer](https://naivedhyajain.engineer)
 - **GitHub:** [https://github.com/Naivedhyajain20](https://github.com/Naivedhyajain20)
-- **LinkedIn:** [NAIVEDHYA JAIN)](https://www.linkedin.com/in/naivedhya-jain-64b791227/)
+- **LinkedIn:** [NAIVEDHYA JAIN](https://www.linkedin.com/in/naivedhya-jain-64b791227/)
 
 ----
 
