@@ -1,168 +1,285 @@
-<div align="center">
-  <img src="https://img.icons8.com/color/96/000000/csv.png" alt="CSV Logo" width="80" height="80">
-  <h1>GrowEasy AI-Powered CSV Importer</h1>
-  <p><strong>An intelligent, full-stack CSV importer that uses AI to automatically map, validate, and standardize messy CSV data into a strict CRM format.</strong></p>
-  
-  <p>
-    <a href="https://ai-powered-csv-importer-gray.vercel.app/" target="_blank">View Live Demo (Frontend)</a> • 
-    <a href="https://ai-powered-csv-importer-1b8i.onrender.com" target="_blank">API Endpoint (Backend)</a>
-  </p>
+# 🚀 GrowEasy – AI Powered CSV Importer
 
-  <p>
-    <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" />
-    <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" />
-    <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-    <img src="https://img.shields.io/badge/Gemini_AI-8E75B2?style=for-the-badge&logo=google&logoColor=white" alt="Gemini AI" />
-  </p>
-</div>
+> Import any CSV into a CRM using AI-powered Header Mapping, Schema Validation, Intelligent Data Transformation and CRM-ready JSON generation.
 
----
+![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
+![Gemini AI](https://img.shields.io/badge/Gemini%20AI-8E75B2?style=for-the-badge&logo=google&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white)
+![Render](https://img.shields.io/badge/Render-%46E3B7.svg?style=for-the-badge&logo=render&logoColor=white)
 
-## 🌟 Overview (GrowEasy Assignment)
+🌐 **Live Demo:** [https://ai-powered-csv-importer-gray.vercel.app/](https://ai-powered-csv-importer-gray.vercel.app/)
 
-This project was built to fulfill the **GrowEasy Assignment** requirements. It is a robust Monorepo application containing a Next.js React frontend and a Node.js/Express backend. 
+⚡ **Backend API:** [https://ai-powered-csv-importer-1b8i.onrender.com/](https://ai-powered-csv-importer-1b8i.onrender.com/)
 
-The core problem it solves: **Uploading unstructured, messy CSV files from various platforms (like Google Ads, Facebook Leads) and intelligently mapping and transforming them into a strict, unified CRM JSON schema using Google's Gemini AI.**
-
-### 🏆 Assignment Requirements Achieved:
-- [x] Full-Stack application (Frontend + Backend).
-- [x] Intelligent AI Column Mapping.
-- [x] Data validation, formatting (Phones, Emails, Status Enums).
-- [x] Graceful Error Handling & Fallbacks.
-- [x] **Bonus:** Extremely Beautiful Custom UI with Glassmorphism.
-- [x] **Bonus:** Dynamic Table rendering for data preview.
-- [x] **Bonus:** Unit Tests (Jest) for transformation logic.
-- [x] **Bonus:** Fully Dockerized (Frontend & Backend).
+📦 **GitHub:** [https://github.com/Naivedhyajain20/AI-powered-CSV-Importer](https://github.com/Naivedhyajain20/AI-powered-CSV-Importer)
 
 ---
 
-## 📸 Application Showcase
+# About
 
-Here is a visual walkthrough of the platform:
+Businesses often receive CSV files exported from different CRMs, Google Sheets, Excel or third-party tools.
 
-*(Click to enlarge)*
-<details open>
-<summary><b>Landing Page & Dashboard</b></summary>
-<br/>
-<img src="img1.png" width="49%" alt="Landing Page Header">
-<img src="img2.png" width="49%" alt="Landing Page Steps">
-<img src="img3.png" width="49%" alt="Workspace Dashboard">
-</details>
+Every file contains different column names.
 
-<details open>
-<summary><b>AI CSV Mapping Workflow</b></summary>
-<br/>
-<img src="img4.png" width="49%" alt="CSV Upload Modal">
-<img src="img5.png" width="49%" alt="CSV Pre-Analysis">
-<img src="img6.png" width="49%" alt="AI Header Mapping Review">
-<img src="img7.png" width="49%" alt="AI Extraction Processing">
-<img src="img8.png" width="49%" alt="Import Complete">
-</details>
+Manually mapping these columns before importing into a CRM is repetitive, error-prone and time consuming.
+
+GrowEasy automates this entire workflow using AI.
+
+---
+
+# Features
+
+| Feature | Description |
+| --- | --- |
+| **CSV Upload** | Drag & Drop CSV Upload |
+| **Preview** | Preview rows before import |
+| **AI Header Mapping** | Automatically maps CSV headers |
+| **Validation** | Detects invalid mappings |
+| **CRM Transformation** | Generates CRM Ready JSON |
+| **Batch Processing** | Processes records in batches |
+| **Retry Mechanism** | Retries failed AI requests |
+| **Processing Summary** | Displays import analytics |
+| **Lead Directory** | Shows imported CRM records |
+| **Download JSON** | Export CRM-ready data |
+
+---
+
+# Project Preview
 
 <details open>
-<summary><b>Data Grid & Final Results</b></summary>
-<br/>
-<img src="img10.png" width="49%" alt="Dynamic AI Leads Directory">
-<img src="img9.png" width="49%" alt="Leads Directory View">
+<summary><b>Hero & Dashboard</b></summary>
+<br>
+
+### Landing Page
+![Landing Page](./img1.png)
+
+### Dashboard
+![Dashboard](./img2.png)
+</details>
+
+<details>
+<summary><b>📂 CSV Upload Workflow</b></summary>
+<br>
+
+### CSV Upload
+Users upload a CSV file through drag-and-drop or file picker.
+
+The backend validates:
+✔ File Size  
+✔ MIME Type  
+✔ Empty Files  
+✔ Invalid CSV  
+before processing.
+
+![CSV Upload](./img3.png)
+
+### CSV Preview
+Displays a preview of the rows before import.
+
+![CSV Preview](./img4.png)
+
+### AI Header Mapping
+Automatically maps CSV headers to CRM fields using Gemini AI.
+
+![AI Header Mapping](./img5.png)
+
+### AI Processing
+Processes records in batches and transforms them into CRM-ready JSON.
+
+![AI Processing](./img6.png)
+
+### Import Summary
+Displays import analytics, successful/failed rows, and allows exporting the final JSON.
+
+![Import Summary](./img7.png)
+</details>
+
+<details>
+<summary><b>Leads & Workflow</b></summary>
+<br>
+
+### Leads Directory
+Shows imported CRM records and their statuses.
+
+![Leads Directory](./img8.png)
+
+### Workflow Section
+Visualizes the AI-powered import pipeline.
+
+![Workflow Section](./img9.png)
 </details>
 
 ---
 
-## 🚀 Key Features
+# Workflow
 
-1. **Intelligent Header Mapping (AI-Powered)**
-   Users can upload any CSV file (regardless of header naming conventions). The system analyzes the data context and uses AI to automatically match columns like `client_name` to `name`, or `mobile_no` to `phone`.
-
-2. **Strict Data Standardization**
-   - **Phones:** Splits phone numbers into `country_code` and `mobile_without_country_code`. (Defaults to `+1` if missing).
-   - **Emails:** Identifies the primary email and pushes any secondary emails directly to the `crm_note` field.
-   - **Enums:** Normalizes diverse strings ("interested", "no answer", "done") into strict CRM Enums (`GOOD_LEAD_FOLLOW_UP`, `BAD_LEAD`, `DID_NOT_CONNECT`, `SALE_DONE`).
-
-3. **Massive Batch Processing Architecture**
-   The backend leverages streaming and chunking to process massive 250-row batches in a single API call. This completely bypasses standard rate limits and transforms hundreds of rows in mere seconds.
-
-4. **Dynamic High-Performance Table**
-   The frontend utilizes a custom dynamic grid to render loaded records seamlessly, scaling dynamically based on the uploaded CSV data and adapting its UI to CRM tags.
-
----
-
-## 🏗 Tech Stack
-
-- **Frontend (`/frontend`)**: Next.js 14, React 18, Framer Motion (Animations), Vanilla CSS, Lucide React (Icons).
-- **Backend (`/backend`)**: Node.js, Express, TypeScript, Zod (Schema Validation), Papaparse (CSV parsing), Pino (Logging).
-- **AI Engine**: Google Gemini API (`llama-3.1-8b-instant` fallback via Groq supported).
-- **Deployment**: Vercel (Frontend) & Render (Backend).
-
----
-
-## 🧩 How It Works (The Pipeline)
-
-1. **Upload:** User drops a CSV file in the interactive UI.
-2. **Analysis:** The Node.js backend reads a chunk of rows and queries Gemini to guess the column headers based on context.
-3. **Review:** The UI presents the AI mappings to the user, complete with confidence scores, allowing manual overrides.
-4. **Extraction:** The backend streams the CSV in batches, standardizing data via Regex and utilizing AI fallbacks for complex parsing.
-5. **Preview:** Records are presented in a highly-performant virtualized data grid where users can export the final standardized JSON.
+CSV Upload  
+↓  
+CSV Parsing  
+↓  
+Header Detection  
+↓  
+AI Header Mapping  
+↓  
+Schema Validation  
+↓  
+CRM Transformation  
+↓  
+Batch Processing  
+↓  
+Retry Failed Requests  
+↓  
+Generate CRM JSON  
+↓  
+Import Summary  
+↓  
+Lead Dashboard  
 
 ---
 
-## 💻 Local Setup (Monorepo)
+# Tech Stack
 
-### 1. Prerequisites
-- Node.js >= 18
-- A Gemini API Key (from Google AI Studio) or Groq API Key.
+**Backend**
+- Node.js
+- Express
+- TypeScript
+- Gemini API
 
-### 2. Backend Setup
+**Frontend**
+- Next.js
+- React
+- TailwindCSS
+- TypeScript
+
+**Deployment**
+- Vercel
+- Render
+
+---
+
+# Folder Structure
+
+```
+src/
+├── controllers/
+├── middlewares/
+├── services/
+├── routes/
+├── validators/
+├── types/
+├── utils/
+├── config/
+└── prompts/
+```
+
+---
+
+# API Endpoints
+
+```
+POST /api/v1/imports/upload
+
+POST /api/v1/imports/mapping
+
+POST /api/v1/imports/import
+
+GET /api/v1/imports/status/:jobId
+```
+
+---
+
+# AI Pipeline
+
+CSV  
+↓  
+Normalize Headers  
+↓  
+Synonym Matching  
+↓  
+Confidence Score  
+↓  
+Gemini AI (Fallback)  
+↓  
+Validate Mapping  
+↓  
+CRM JSON  
+↓  
+Import Summary  
+
+---
+
+# Error Handling
+
+✔ Invalid CSV  
+✔ Empty CSV  
+✔ Unsupported MIME  
+✔ Invalid Mapping  
+✔ AI Retry  
+✔ Schema Validation  
+✔ Duplicate Mapping Detection  
+✔ Batch Failure Recovery  
+
+---
+
+# Local Setup
+
 ```bash
-cd backend
+git clone https://github.com/Naivedhyajain20/AI-powered-CSV-Importer.git
+
 npm install
-```
-Create a `.env` file in the `backend/` directory:
-```env
-PORT=3001
-GROQ_API_KEY=your_api_key_here
-```
-Run the backend:
-```bash
+
+cp .env.example .env
+
 npm run dev
 ```
-*The API will run on `http://localhost:3001`*
 
-### 3. Frontend Setup
-Open a new terminal window:
-```bash
-cd frontend
-npm install
-```
-Create a `.env` file in the `frontend/` directory:
+---
+
+# Environment Variables
+
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3001
+PORT=
+GEMINI_API_KEY=
 ```
-Run the frontend:
-```bash
-npm run dev
-```
-*The App will run on `http://localhost:3000`*
 
 ---
 
-## 🐳 Docker Setup (Bonus)
+# Future Improvements
 
-You can run the entire stack instantly using Docker Compose:
-
-1. Ensure your `.env` files are configured.
-2. From the root directory, run:
-```bash
-docker-compose up --build
-```
-This will containerize and start both the Node.js backend API and the Next.js frontend simultaneously.
+- Authentication
+- Multiple CRM Support
+- Webhook Integration
+- Background Queue
+- CSV History
+- Role Based Access
+- Import Analytics
+- Cloud Storage
 
 ---
 
-## 🧪 Unit Testing (Bonus)
+# Assignment Objectives Covered
 
-The strict transformation logic that parses phones, emails, and CRM statuses is heavily tested.
+✔ CSV Upload  
+✔ CSV Preview  
+✔ AI Header Mapping  
+✔ Intelligent Validation  
+✔ CRM Transformation  
+✔ Batch Processing  
+✔ Retry Logic  
+✔ Processing Summary  
+✔ Responsive UI  
+✔ API Architecture  
 
-```bash
-cd backend
-npm test
-```
+---
+
+# Author
+
+**Naivedhya Jain**
+
+- **Portfolio:** [https://naivedhyajain.engineer](https://naivedhyajain.engineer)
+- **GitHub:** [https://github.com/Naivedhyajain20](https://github.com/Naivedhyajain20)
+- **LinkedIn:** [Add your profile URL here](https://linkedin.com/in/)
