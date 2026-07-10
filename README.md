@@ -164,16 +164,25 @@ Lead Dashboard
 # Folder Structure
 
 ```
-src/
-├── controllers/
-├── middlewares/
-├── services/
-├── routes/
-├── validators/
-├── types/
-├── utils/
-├── config/
-└── prompts/
+├── backend/
+│   └── src/
+│       ├── config/
+│       ├── controllers/
+│       ├── middlewares/
+│       ├── prompts/
+│       ├── routes/
+│       ├── services/
+│       ├── types/
+│       ├── utils/
+│       └── validators/
+└── frontend/
+    └── src/
+        ├── app/
+        ├── components/
+        ├── constants/
+        ├── hooks/
+        ├── services/
+        └── types/
 ```
 
 ---
@@ -261,25 +270,17 @@ GEMINI_API_KEY=
 
 ---
 
-# Assignment Objectives Covered
-
-✔ CSV Upload  
-✔ CSV Preview  
-✔ AI Header Mapping  
-✔ Intelligent Validation  
-✔ CRM Transformation  
-✔ Batch Processing  
-✔ Retry Logic  
-✔ Processing Summary  
-✔ Responsive UI  
-✔ API Architecture  
-
----
-
 # Author
 
 **Naivedhya Jain**
 
 - **Portfolio:** [https://naivedhyajain.engineer](https://naivedhyajain.engineer)
 - **GitHub:** [https://github.com/Naivedhyajain20](https://github.com/Naivedhyajain20)
-- **LinkedIn:** [Add your profile URL here](https://linkedin.com/in/)
+- **LinkedIn:** [Add your profile URL here](https://www.linkedin.com/in/naivedhya-jain-64b791227/)
+
+----
+
+---
+<div align="center">
+  Made with ❤️ by <b>Naivedhya Jain</b>
+</div>
