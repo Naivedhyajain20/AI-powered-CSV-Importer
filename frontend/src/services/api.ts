@@ -5,7 +5,7 @@ import {
   CSVRecord,
 } from '../types/import';
 
-const API_BASE_URL = 'http://localhost:5050/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
 export const uploadCSV = async (file: File): Promise<UploadResponse> => {
   const formData = new FormData();
