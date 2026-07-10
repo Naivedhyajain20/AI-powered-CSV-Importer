@@ -10,6 +10,7 @@
 ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white)
 ![Render](https://img.shields.io/badge/Render-%46E3B7.svg?style=for-the-badge&logo=render&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 
 🌐 **Live Demo:** [https://ai-powered-csv-importer-gray.vercel.app/](https://ai-powered-csv-importer-gray.vercel.app/)
 
@@ -55,10 +56,10 @@ GrowEasy automates this entire workflow using AI.
 <br>
 
 ### Landing Page
-![Landing Page](./img1.png)
+![Landing Page](./DEMO_IMG/img1.png)
 
 ### Dashboard
-![Dashboard](./img2.png)
+![Dashboard](./DEMO_IMG/img2.png)
 </details>
 
 <details>
@@ -75,27 +76,27 @@ The backend validates:
 ✔ Invalid CSV  
 before processing.
 
-![CSV Upload](./img3.png)
+![CSV Upload](./DEMO_IMG/img3.png)
 
 ### CSV Preview
 Displays a preview of the rows before import.
 
-![CSV Preview](./img4.png)
+![CSV Preview](./DEMO_IMG/img4.png)
 
 ### AI Header Mapping
 Automatically maps CSV headers to CRM fields using Gemini AI.
 
-![AI Header Mapping](./img5.png)
+![AI Header Mapping](./DEMO_IMG/img5.png)
 
 ### AI Processing
 Processes records in batches and transforms them into CRM-ready JSON.
 
-![AI Processing](./img6.png)
+![AI Processing](./DEMO_IMG/img6.png)
 
 ### Import Summary
 Displays import analytics, successful/failed rows, and allows exporting the final JSON.
 
-![Import Summary](./img7.png)
+![Import Summary](./DEMO_IMG/img7.png)
 </details>
 
 <details>
@@ -105,12 +106,12 @@ Displays import analytics, successful/failed rows, and allows exporting the fina
 ### Leads Directory
 Shows imported CRM records and their statuses.
 
-![Leads Directory](./img8.png)
+![Leads Directory](./DEMO_IMG/img8.png)
 
 ### Workflow Section
 Visualizes the AI-powered import pipeline.
 
-![Workflow Section](./img9.png)
+![Workflow Section](./DEMO_IMG/img9.png)
 </details>
 
 ---
@@ -238,6 +239,7 @@ Import Summary
 
 ```bash
 git clone https://github.com/Naivedhyajain20/AI-powered-CSV-Importer.git
+cd AI-powered-CSV-Importer
 
 npm install
 
@@ -245,6 +247,25 @@ cp .env.example .env
 
 npm run dev
 ```
+
+---
+
+# Docker Setup
+
+You can also run the entire application (frontend + backend) using Docker.
+
+```bash
+git clone https://github.com/Naivedhyajain20/AI-powered-CSV-Importer.git
+cd AI-powered-CSV-Importer
+
+cp .env.example .env
+
+# Build and start the containers
+docker-compose up --build
+```
+This will start:
+- **Frontend:** `http://localhost:3000`
+- **Backend:** `http://localhost:3001`
 
 ---
 
@@ -277,8 +298,6 @@ GEMINI_API_KEY=
 - **Portfolio:** [https://naivedhyajain.engineer](https://naivedhyajain.engineer)
 - **GitHub:** [https://github.com/Naivedhyajain20](https://github.com/Naivedhyajain20)
 - **LinkedIn:** [Add your profile URL here](https://www.linkedin.com/in/naivedhya-jain-64b791227/)
-
-----
 
 ---
 <div align="center">
